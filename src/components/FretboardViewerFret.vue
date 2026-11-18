@@ -3,7 +3,7 @@
   (https://github.com/cheap-glitch/fretboarder).
 
   Original work Copyright (c) 2019-2021, cheap glitch
-  Modifications Copyright (c) 2022-2026, Phil Yastrow and Bradley Fish
+  Modifications Copyright (c) 2022-2026, Bradley Fish and Phil Yastrow
 
   This Source Code Form is subject to the terms of the Mozilla Public
   License, v. 2.0. If a copy of the MPL was not distributed with this
