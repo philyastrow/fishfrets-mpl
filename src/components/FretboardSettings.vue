@@ -381,7 +381,8 @@ import { get, sync }                          from 'vuex-pathify'
 
 const packageJson = require('@/../package.json');
 
-import { MIN_NB_FRETS, MAX_NB_FRETS, MAX_NB_CAPOS, SEQ_COLOR_NAMES } from '@/modules/constants'
+import { MIN_NB_FRETS, MAX_NB_FRETS, MAX_NB_CAPOS } from '@/modules/constants'
+import { buildShareUrl } from '@/modules/shareUrl'
 import { mapObjectToObject }                  from '@/modules/object'
 import { instruments, tunings, tuningsNames } from '@/modules/music'
 import { formatOrdinalSuffix, formatFretNb }  from '@/modules/text'
@@ -579,80 +580,7 @@ export default {
 			// this.$store.commit('fretboard/toggle.isFlippedHor');
 		},
 		copyShareUrl() {
-			const fb   = this.$store.state.fretboard;
-			const seqs = this.$store.state.sequences.sequences.filter(s => s.isVisible);
-
-			const view = (fb.isFlippedHor && fb.isFlippedVert) ? 'LHA'
-				: fb.isFlippedHor  ? 'LHP'
-				: fb.isFlippedVert ? 'RHA' : 'RHP';
-
-			const params = new URLSearchParams();
-			params.set('instrument', fb.instrument);
-			params.set('view', view);
-
-			// Settings that change what the fretboard actually shows (as opposed
-			// to cosmetic prefs like dark mode) -- only emitted when they differ
-			// from their store default, kept in sync with the URL parser in
-			// App.vue's mounted().
-			if (fb.tuning !== 'standard') params.set('tuning', fb.tuning);
-			if (fb.tuning === 'custom') params.set('customtuning', fb.customTuning.join(','));
-			if (fb.ovalFretWidth !== 0) params.set('ovalwidth', String(fb.ovalFretWidth));
-			if (fb.noteInfos !== 'name') params.set('noteinfos', fb.noteInfos);
-			// Audio is off by default and not remembered between visits, so a
-			// link made with Audio on carries it explicitly (Phil, 2026-10-26).
-			if (fb.audioPreviewActive) params.set('audio', '1');
-			if (!fb.isShowingFretNbs) params.set('fretnbs', '0');
-
-			const URL_SUFFIXES = ['', '2', '3', '4', '5'];
-			seqs.forEach((seq, i) => {
-				const s = URL_SUFFIXES[i];
-				params.set('key'      + s, seq.tonality);
-				params.set('scale'    + s, seq.model);
-				params.set('position' + s, String(seq.position));
-				const colorName = SEQ_COLOR_NAMES[seq.color];
-				if (colorName) params.set('color' + s, colorName);
-				if (seq.showOval)          params.set('oval'       + s, '1');
-				if (seq.harmonyInterval)   params.set('harmony'    + s, String(seq.harmonyInterval));
-				if (seq.harmonySkipString) params.set('skipstring' + s, '1');
-				// Custom scale: key/scale/position alone don't say which notes are in
-				// it, so a shared link needs its own note selection spelled out
-				// explicitly.
-				if (seq.model === 'custom') {
-					const activeNotes = Object.entries(seq.customSequence)
-						.filter(([, active]) => active)
-						.map(([note]) => note);
-					params.set('customnotes' + s, activeNotes.join(','));
-				}
-				// Custom fret RANGE ("Custom" position) is independent of custom
-				// SCALE -- any named model (e.g. bebop major) can use it too, not
-				// just a custom-notes scale -- so this can't live inside the
-				// `model === 'custom'` block above (bug 20260827-2 follow-up: it
-				// did, so a shared link for a named scale in the Custom position
-				// silently dropped its fret range entirely).
-				if (seq.position === -1) params.set('custombounds' + s, seq.customFretBounds.join(','));
-				// Notes hidden by hand (bug 20261012-2): "physicalString:fret" keys.
-				if (seq.hiddenFrets?.length) params.set('hidden' + s, seq.hiddenFrets.join(','));
-			});
-
-			// Muted strings: encode as comma-separated 0/1 bitmask, omit if all enabled
-			const muted = fb.enabledStrings.map(e => e === false ? '0' : '1').join(',');
-			if (muted.includes('0')) params.set('muted', muted);
-
-			// Capo(s) (bug 20260914-4, follow-up: "could we add two capos at
-			// the same time?"): capo/capo2/... same suffix convention as the
-			// scale/arpeggio params above, so old single-capo links (bare
-			// `capo=N`) keep working unchanged. caporeleased/caporeleased2/...
-			// is the same bitmask shape as `muted`, omitted unless that capo
-			// actually has a released string.
-			fb.capos.forEach((capo, i) => {
-				const s = URL_SUFFIXES[i];
-				if (s === undefined) return;
-				params.set('capo' + s, String(capo.fret));
-				const released = capo.releasedStrings.map(r => r ? '1' : '0').join(',');
-				if (released.includes('1')) params.set('caporeleased' + s, released);
-			});
-
-			const url = window.location.origin + window.location.pathname + '?' + params.toString();
+			const url = buildShareUrl(this.$store.state);
 			navigator.clipboard.writeText(url).then(() => {
 				this.copyUrlFeedback = true;
 				setTimeout(() => { this.copyUrlFeedback = false; }, 2000);

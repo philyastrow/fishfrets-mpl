@@ -102,6 +102,19 @@ div.root(v-mods="{isLayoutLandscape,isMobileDevice,isSubpageSettings}")
 					div.version-stamp(v-if="!isMobileDevice") 🎸 Fish Frets {{ version }}
 				FretboardOvals
 				PositionNudgers
+				//- Bug button (Phil + Bradley, 2026-11-18): one tap opens Report
+				//- Bug, for mid-lesson bugs on a tablet with no Ctrl-B. Sits below
+				//- the lower-left tuning peg. Always on at localhost; elsewhere off
+				//- unless this device was given ?bugbutton=on (remembered;
+				//- ?bugbutton=off hides it).
+				button.bug-fab(
+					v-if="bugButtonOn && !bugTrackerActive"
+					type="button"
+					title="Report a bug (Ctrl-B)"
+					aria-label="Report a bug"
+					@click="openBugReport"
+				)
+					span.bug-fab__dot 🐞
 				div.scale-titles.hand-drawn(v-if="!isMobileDevice || isLayoutLandscape" :class="{ 'two-scales': scaleTexts.length === 3 }")
 					div.scale-texts
 						div.scale-text(v-for="scaleText of scaleTexts") 
@@ -210,6 +223,14 @@ const packageJson = require('@/../package.json');
 // arpeggios, 4 for scales).
 const OVAL_WIDTH_CYCLE = [0, 4, 2, 3];
 
+const BUG_BUTTON_KEY = 'fishfrets@bugButton';
+function readBugButtonSetting() {
+	let saved = null;
+	try { saved = localStorage.getItem(BUG_BUTTON_KEY); } catch (e) { /* private mode */ }
+	if (saved) return saved === 'on';
+	return window.location.hostname === 'localhost';   // always on for Phil's dev server
+}
+
 export default {
 	name: 'App',
 
@@ -235,6 +256,7 @@ export default {
 			bugTrackerActive: false,
 			bugTrackerTab:    'report',
 			bugTrackerFocusId: null,
+			bugButtonOn:      readBugButtonSetting(),
 			ovalWidthFlash:   null,
 			undoFlash:        null,
 			soundFlash:       null,
@@ -540,6 +562,13 @@ export default {
 			this.bugTrackerActive  = true;
 		}
 
+		// ?bugbutton=on / ?bugbutton=off shows or hides the floating bug
+		// button on this device from now on.
+		if (p.has('bugbutton')) {
+			this.bugButtonOn = p.get('bugbutton') !== 'off';
+			try { localStorage.setItem(BUG_BUTTON_KEY, this.bugButtonOn ? 'on' : 'off'); } catch (e) { /* private mode */ }
+		}
+
 		// ?chart=120//:D C(add9)/G/G:// (Phil + Bradley, 2026-10-26) opens the
 		// Jam box with that chart, ready for Play -- not playing yet, since a
 		// browser only lets sound start from a click.
@@ -668,6 +697,11 @@ export default {
 	},
 
 	methods: {
+		openBugReport() {
+			this.bugTrackerFocusId = null;
+			this.bugTrackerTab     = 'report';
+			this.bugTrackerActive  = true;
+		},
 		// Add all kinds of media queries as methods.
 		...Object.fromEntries(Object.keys(mediaQueries).map(mq => [`update.${mq}`, function(event) { return this.$store.commit(mq, event.matches); }])),
 		flashOvalWidth(n) {
@@ -1230,6 +1264,42 @@ export default {
 	font-family: 'Segoe UI', sans-serif;
 	line-height: 1.4;
 	max-width: 260px;
+}
+
+// Bug button (see template). The button itself is an invisible tap area
+// covering the lower-left tuning peg and the strip below it, so a tap anywhere
+// near the peg opens Report Bug; only the small dot under the peg shows.
+.bug-fab {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	z-index: 50;
+	width: 6.5%;
+	height: 27%;
+	padding: 0 0 0.3% 0;
+	border: none;
+	background: transparent;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+
+	&:hover .bug-fab__dot { opacity: 1; }
+}
+.bug-fab__dot {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: clamp(14px, 1.45vw, 21px);
+	height: clamp(14px, 1.45vw, 21px);
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, 0.85);
+	background: #c0392b;
+	font-size: clamp(8px, 0.8vw, 12px);
+	line-height: 1;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+	opacity: 0.85;
 }
 
 </style>
