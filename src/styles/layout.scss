@@ -1,0 +1,32 @@
+/*
+ * This file is part of FishFrets and is derived from Fretboarder
+ * (https://github.com/cheap-glitch/fretboarder).
+ *
+ * Original work Copyright (c) 2019-2021, cheap glitch
+ * Modifications Copyright (c) 2022-2026, Phil Yastrow and Bradley Fish
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+// Breakpoints
+$mq-breakpoint-desktop:    1024px;
+$mq-breakpoint-wide:       1300px;
+
+// UI
+$button-size-normal:       20px;
+$button-size-big:          30px;
+$select-bar-height:        40px;
+$select-options-height:    300px;
+
+// Fretboard decorations
+$nut-thickness:            6px;
+$string-thickness:         2px;
+$fretbar-thickness:        3px;
+
+// Fretboard layout
+$note-size:                40px;
+$fret-width:               42px;
+$min-fret-length:          calc($note-size + $fretbar-thickness);
+$open-string-fret-length:  44px;
+$fret-number-wrapper-size: 50px;
