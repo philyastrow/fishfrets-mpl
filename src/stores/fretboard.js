@@ -128,6 +128,14 @@ const model = {
 		validator: v => typeof v == 'boolean',
 		saved: false,
 	},
+	/** The chord coming next in Jam mode, for the stacked neck under the
+	 *  fretboard (StackedNeck.vue, 4.2.0): { symbol, tonality, model,
+	 *  position, bounds, color, rootColor }, or null. Set by JamPanel. */
+	jamNextChord: {
+		default: null,
+		validator: v => v === null || typeof v == 'object',
+		saved: false,
+	},
 	/** Text the Jam box opens with -- set by a ?chart=... link. */
 	jamText: {
 		default: '',

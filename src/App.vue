@@ -124,6 +124,10 @@ div.root(v-mods="{isLayoutLandscape,isMobileDevice,isSubpageSettings}")
 							)
 							span {{ scaleText.text }}
 					div.strings-text {{ stringsText }}
+			//- Stacked necks (4.2.0, Phil + Bradley, 2026-11-19): in Jam mode,
+			//- the chord coming next on a neck under the main one. Not on
+			//- phones: there's no room.
+			StackedNeck(v-if="jamModeActive && !isMobileDevice")
 			div.header-spacer(
 			v-if="shouldDisplayHeaderSpacer"
 			style="height:4rem"
@@ -210,6 +214,7 @@ import CoordHelper           from '@/components/CoordHelper'
 import TunerPanel            from '@/components/TunerPanel'
 import SongPanel             from '@/components/SongPanel'
 import JamPanel              from '@/components/JamPanel'
+import StackedNeck           from '@/components/StackedNeck'
 import { applyChordList }    from '@/modules/jam'
 import BugTracker            from '@/components/BugTracker'
 import { resetAllSettings }  from '@/modules/reset'
@@ -246,6 +251,7 @@ export default {
 		TunerPanel,
 		SongPanel,
 		JamPanel,
+		StackedNeck,
 		BugTracker,
 	},
 
