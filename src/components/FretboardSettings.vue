@@ -329,14 +329,17 @@ div.FretboardSettings
 	//- 	@click="$store.commit('fretboard/songModeActive', !songModeActive)"
 	//- 	)
 
-	//- Help menu
+	//- Help menu. On phones it's a section of the Settings page (the gear),
+	//- like Instrument and Display, with the Jam Mode Cheat Sheet too
+	//- (Phil, 2026-11-22).
 	//----------------------------------------------------------------------
-	VPopupMenu(
-		v-if="!isMobileDevice"
+	component(
+		:is="isMobileDevice ? 'div' : 'VPopupMenu'"
 
 		icon="circle-question"
 		text="Help"
 		)
+		h2.mobile-section-title(v-if="isMobileDevice") Help
 		div.export-menu
 			div.export-menu__buttons
 				VButton(
@@ -365,12 +368,13 @@ div.FretboardSettings
 
 	//- About menu
 	//----------------------------------------------------------------------
-	VPopupMenu(
-		v-if="!isMobileDevice"
+	component(
+		:is="isMobileDevice ? 'div' : 'VPopupMenu'"
 
 		icon="circle-info"
 		text="About"
 		)
+		h2.mobile-section-title(v-if="isMobileDevice") About
 		div.about-menu
 			p.about-title 🎸 Fish Frets
 			p.about-subtitle A Smilin' Phil Smilin' Frets Production
@@ -651,6 +655,15 @@ export default {
 		display: flex;
 		@include space-children-h(10px);
 	}
+}
+
+.mobile-section-title {
+	margin: 2.4rem 0 0.8rem;
+	padding: 1.6rem 1.6rem 0;
+	border-top: 1px solid var(--color--border, rgba(255,255,255,.12));
+	font-size: 1.8rem;
+	font-weight: bold;
+	color: var(--color--text);
 }
 
 .settings-menu {
