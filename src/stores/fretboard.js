@@ -130,7 +130,7 @@ const model = {
 	},
 	/** The chord coming next in Jam mode, for the stacked neck under the
 	 *  fretboard (StackedNeck.vue, 4.2.0): { symbol, tonality, model,
-	 *  position, bounds, color, rootColor }, or null. Set by JamPanel. */
+	 *  position, bounds, seqIndex, look }, or null. Set by JamPanel. */
 	jamNextChord: {
 		default: null,
 		validator: v => v === null || typeof v == 'object',

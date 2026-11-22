@@ -118,7 +118,7 @@ div.FretboardViewerFret
 import { get }                                 from 'vuex-pathify'
 
 import { notesNames, degrees, models }                 from '@/modules/music'
-import { ovalState }                               from '@/modules/ovalState'
+import { stackAware }                              from '@/modules/stackContext'
 import { intervalsNames, intervalsShorthands } from '@/modules/music'
 import { notes }                               from '@/modules/music'
 import { resolveNoteName }                     from '@/modules/notenames'
@@ -133,6 +133,9 @@ import { fishForFret, rotationForFret }         from '@/modules/fishInlays'
 
 export default {
 	name: 'FretboardViewerFret',
+
+	// Can be drawn again for the next-chord neck (stackContext.js).
+	mixins: [stackAware],
 
 	props: {
 		string: {
@@ -469,7 +472,7 @@ export default {
 			// notes rather than a blank-looking fretboard mid-song.
 			const key = `${this.string}:${this.number}`;
 			return !ovalSeqs.some(s => {
-				const keys = ovalState.voicingKeys[s.sequence.id];
+				const keys = this.ovalCtx.voicingKeys[s.sequence.id];
 				if (s.sequence.ovalFallback && ![...(keys || [])].some(k => !k.endsWith(':0'))) return true;
 				return keys && keys.has(key);
 			});
@@ -535,7 +538,6 @@ export default {
 			'isMobileDevice',
 			'isLayoutLandscape',
 			'backgroundSize',
-			'sequences/displayedSequences',
 			'fretboard/enabledStrings',
 			'fretboard/instrument',
 			'fretboard/isFlippedHor',
@@ -604,15 +606,15 @@ export default {
 			const thisNote = { string: this.string, number: this.number, note: this.note };
 			// The tail of a harmony arrow plays together with the note at its point
 			// (Phil + Bradley, 2026-11-01): hear the 3rd, 6th... you're looking at.
-			const harmony = ovalState.harmonyTargets?.(this.string, this.number) || [];
+			const harmony = this.ovalCtx.harmonyTargets?.(this.string, this.number) || [];
 			// A voicing note plays its whole chord shape (bug 20260810-2). A note
 			// that sits inside an oval but isn't one of its notes plays that chord
 			// PLUS itself (Phil: "play the chord plus that note").
-			const voicing = ovalState.voicingNotes[`${this.string}:${this.number}`];
-			const around  = voicing ? null : ovalState.voicingAround?.(this.string, this.number);
+			const voicing = this.ovalCtx.voicingNotes[`${this.string}:${this.number}`];
+			const around  = voicing ? null : this.ovalCtx.voicingAround?.(this.string, this.number);
 			// Outside every oval: add this note to ALL the drawn ovals and play the
 			// lot together (Phil: "crazy in whole position").
-			const everyOval = voicing || around ? null : ovalState.allOvalNotes?.();
+			const everyOval = voicing || around ? null : this.ovalCtx.allOvalNotes?.();
 			const notesToPlay = harmony.length ? [thisNote, ...harmony] : voicing ?? (around ? [...around, thisNote] : (everyOval ? [...everyOval, thisNote] : [thisNote]));
 
 			const midiNotes = notesToPlay.map(f => noteMidi({

@@ -167,10 +167,19 @@ div.FretboardSettings
 			//- 	)
 
 			VToggleButton(
-				text="🎵 Tuner"
+				text="🎵 Tuner (Ctrl-T)"
 				icon="music"
 				:is-active="tunerActive"
 				@click.native="$store.commit('fretboard/tunerActive', !tunerActive)"
+				)
+
+			//- Jam mode in the menu too (Phil + Bradley, 2026-11-19), not only
+			//- the secret Ctrl-J; under Tuner (Phil, 2026-11-21).
+			VToggleButton(
+				text="🎸 Jam mode (Ctrl-J)"
+				icon="guitar"
+				:is-active="jamModeActive"
+				@click.native="$store.commit('fretboard/jamModeActive', !jamModeActive)"
 				)
 
 			//- VToggleButton(
@@ -439,6 +448,7 @@ export default {
 			'isFlippedHor',
 			'isFlippedVert',
 			'tunerActive',
+			'jamModeActive',
 			'songModeActive',
 			// 'roygbivActive',
 			'noteSize',

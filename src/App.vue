@@ -518,6 +518,13 @@ export default {
 				this.$store.commit('fretboard/jamModeActive', !this.jamModeActive);
 				return;
 			}
+			// Ctrl-T opens and closes the tuner (Phil, 2026-11-20), like
+			// Display > Tuner.
+			if (e.ctrlKey && !e.metaKey && !e.altKey && e.key === 't') {
+				e.preventDefault();
+				this.$store.commit('fretboard/tunerActive', !this.tunerActive);
+				return;
+			}
 			if (e.ctrlKey && e.key === 'o') {
 				e.preventDefault();
 				const idx  = OVAL_WIDTH_CYCLE.indexOf(this.ovalFretWidth);

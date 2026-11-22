@@ -104,6 +104,7 @@ import { layout }               from '@/modules/layout'
 import { instruments }          from '@/modules/music'
 import { getFrets, scalePositionWindow, isFretHidden } from '@/modules/fretboard2'
 import { ovalState }            from '@/modules/ovalState'
+import { stackAware }           from '@/modules/stackContext'
 import { noteMidi }             from '@/modules/audioPreview'
 import { tuningNotes }          from '@/modules/tuning'
 import { findBackground, positionForFretNumber, styleForCapo }       from '@/modules/background'
@@ -114,6 +115,9 @@ import PositionBracket from '@/components/PositionBracket'
 
 export default {
 	name: 'FretboardViewer',
+
+	// Can be drawn again for the next-chord neck (stackContext.js).
+	mixins: [stackAware],
 
 	components: {
 		FretboardViewerFret,
@@ -383,10 +387,6 @@ export default {
 			return brackets;
 		},
 
-		...get('sequences', [
-			'displayedSequences'
-		]),
-
 		...get('fretboard', [
 			'instrument',
 			'tuning',
@@ -423,11 +423,11 @@ export default {
 	},
 
 	created() {
-		ovalState.shownMidiNotes = () => this.shownMidiNotes();
+		if (!this.fishStack) ovalState.shownMidiNotes = () => this.shownMidiNotes();
 	},
 
 	beforeDestroy() {
-		ovalState.shownMidiNotes = null;
+		if (!this.fishStack) ovalState.shownMidiNotes = null;
 	},
 
 	methods: {
