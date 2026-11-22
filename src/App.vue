@@ -195,6 +195,7 @@ import { instruments, models, notesNames }       from '@/modules/music'
 import { nameModel }         from '@/modules/name_scale'
 import { enabledStringsText} from '@/modules/enabled_strings'
 import { tuningNotes }       from '@/modules/tuning'
+import { chartFromEntries }  from '@/modules/song'
 import { capitalizeWords }   from '@/modules/text'
 import { resolveNoteName }           from '@/modules/notenames'
 import { findBackground, findBackgroundImage, findBackgroundTransform } from '@/modules/background'
@@ -513,8 +514,17 @@ export default {
 				return;
 			}
 			// Jam mode (Phil, 2026-10-26): a secret shortcut, not in any menu.
+			// Opening it fills the Jam box with the chords on the fretboard,
+			// one to a bar, each in its entry's position, with their strings
+			// (Phil, 2026-11-22): "S:eBGD A:1 / C+pO / Dm+p4 / ... /". No chord entries (a
+			// scale), and the box keeps what it had.
 			if (e.ctrlKey && e.key === 'j') {
 				e.preventDefault();
+				if (!this.jamModeActive) {
+					const notes = tuningNotes({ instrument: this.instrument, tuning: this.tuning, customTuning: this.customTuning });
+					const chart = chartFromEntries(this.displayedSequences, this.enabledStrings, notes);
+					if (chart) this.$store.commit('fretboard/jamText', chart);
+				}
 				this.$store.commit('fretboard/jamModeActive', !this.jamModeActive);
 				return;
 			}
